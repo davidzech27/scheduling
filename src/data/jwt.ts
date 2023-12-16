@@ -1,6 +1,6 @@
 import { cookies } from "next/headers"
 
-import * as jose from "jose"
+import { SignJWT, jwtVerify } from "jose"
 import z from "zod"
 
 import env from "~/env.js"
@@ -20,7 +20,7 @@ const jwtPayloadSchema = z.object({
 export type JWTPayload = z.infer<typeof jwtPayloadSchema>
 
 async function encodeJWTPayload(jwtPayload: JWTPayload) {
-	return await new jose.SignJWT(jwtPayload)
+	return await new SignJWT(jwtPayload)
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
 		.sign(new TextEncoder().encode(env.JWT_SECRET))
@@ -29,7 +29,7 @@ async function encodeJWTPayload(jwtPayload: JWTPayload) {
 async function decodeJWTPayload(encodedJWTPayload: string) {
 	return jwtPayloadSchema.parse(
 		(
-			await jose.jwtVerify(
+			await jwtVerify(
 				encodedJWTPayload,
 				new TextEncoder().encode(env.JWT_SECRET),
 			)
