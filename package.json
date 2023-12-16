@@ -41,7 +41,7 @@
     "eslint-config-next": "^14.0.4",
     "fuse.js": "^7.0.0",
     "immer": "^10.0.3",
-    "jose": "3",
+    "jose": "latest",
     "lucide-react": "^0.294.0",
     "mysql2": "^3.6.1",
     "next": "^14.0.4",
