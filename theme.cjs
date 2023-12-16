@@ -1,0 +1,26 @@
+module.exports = {
+	colors: {
+		primary: "#7876F0",
+		title: "#202020",
+		text: "#646464",
+		subtext: "#A3A3A3",
+		background: "#FFFFFF",
+		subtleBackground: "#F9F9F9",
+		uiBackground: "#F0F0F0",
+		uiHoverBackground: "#E8E8E8",
+		uiActiveBackground: "#E0E0E0",
+		lightBorder: "#F7F7F7",
+		border: "#F0F0F0",
+		inputBackground: "#F9F9F9",
+		inputText: "#202020",
+		inputPlaceholder: "#A7A7A7",
+		ring: "#5D8EF7",
+		error: "#EA3423",
+		success: "#7DE0C4",
+		warning: "#E9AA45",
+	},
+	opacity: {
+		disabled: "0.5",
+		hover: "0.85",
+	},
+}

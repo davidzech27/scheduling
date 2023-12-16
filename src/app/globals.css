@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	*::selection {
+		@apply bg-primary;
+		opacity: 1;
+		color: white;
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	* {
+		overscroll-behavior: none;
+	}
+
+	.no-scroll-bar::-webkit-scrollbar {
+		width: 0px;
+	}
+
+	.no-scroll-bar {
+		scrollbar-width: none;
+	}
+
+	input[type="search"]::-webkit-search-cancel-button {
+		-webkit-appearance: none;
+		height: 0;
+		width: 0;
+	}
+
+	div {
+		user-select: none;
+	}
+}
