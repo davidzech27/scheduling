@@ -84,8 +84,12 @@ export default function FocusedBookingSideBarContent() {
 	const startAtInputRef = useRef<HTMLInputElement>(null)
 	const endAtInputRef = useRef<HTMLInputElement>(null)
 
+	const changedTimeRef = useRef(false)
+
 	function onChangeStartAtInput(input: string) {
 		if (focusedBooking === undefined) return
+
+		changedTimeRef.current = true
 
 		setTimeout(() => {
 			if (
@@ -157,6 +161,8 @@ export default function FocusedBookingSideBarContent() {
 
 	function onChangeEndAtInput(input: string) {
 		if (focusedBooking === undefined) return
+
+		changedTimeRef.current = true
 
 		setTimeout(() => {
 			if (
@@ -425,7 +431,11 @@ export default function FocusedBookingSideBarContent() {
 										}`,
 									)
 
-									void focusedBooking.save()
+									if (changedTimeRef.current) {
+										void focusedBooking.save()
+
+										changedTimeRef.current = false
+									}
 								}}
 								spellCheck={false}
 								autoComplete="off"
@@ -462,7 +472,11 @@ export default function FocusedBookingSideBarContent() {
 										}`,
 									)
 
-									void focusedBooking.save()
+									if (changedTimeRef.current) {
+										void focusedBooking.save()
+
+										changedTimeRef.current = false
+									}
 								}}
 								spellCheck={false}
 								autoComplete="off"
