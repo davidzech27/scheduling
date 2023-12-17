@@ -15,22 +15,14 @@ interface Props {
 export default function Booking({ id }: Props) {
 	const booking = useBooking({ id })
 
-	if (booking === undefined) {
-		throw new Error(`Booking with id ${id} not found`)
-	}
-
-	const user = useUser({ username: booking.username })
-
-	if (user === undefined) {
-		throw new Error(`Booking with id ${id} not found`)
-	}
+	const user = useUser({ username: booking?.username ?? "" })
 
 	const rooms = useRooms()
 
-	const roomIndex = rooms.findIndex((room) => room.name === booking.roomName)
+	const roomIndex = rooms.findIndex((room) => room.name === booking?.roomName)
 
 	useLayoutEffect(() => {
-		if (booking.focused) {
+		if (booking?.focused) {
 			ref.current?.scrollIntoView({
 				block: "nearest",
 				inline: "nearest",
@@ -40,10 +32,10 @@ export default function Booking({ id }: Props) {
 		} else {
 			ref.current?.blur()
 		}
-	}, [booking.focused])
+	}, [booking?.focused])
 
-	const startTime = booking.startAt.getTime()
-	const endTime = booking.endAt.getTime()
+	const startTime = booking?.startAt.getTime()
+	const endTime = booking?.endAt.getTime()
 
 	useLayoutEffect(() => {
 		ref.current?.scrollIntoView({
@@ -56,11 +48,23 @@ export default function Booking({ id }: Props) {
 
 	const [grabbing, setGrabbing] = useState(false)
 
-	const past = booking.endAt < new Date()
+	const past = (booking?.endAt ?? -1) < new Date()
 
 	const settings = useSettings()
 
 	const ref = useRef<HTMLDivElement>(null)
+
+	if (booking === undefined) {
+		console.error(`Booking with id ${id} not found`)
+
+		return null
+	}
+
+	if (user === undefined) {
+		console.error(`Booking with id ${id} not found`)
+
+		return null
+	}
 
 	return (
 		<div
