@@ -120,7 +120,7 @@ export const filter = loader.authed(
 	const startOfDay = new Date(date.setHours(0, 0, 0, 0))
 	const endOfDay = new Date(date.setHours(23, 59, 59, 999))
 
-	return await db
+	const bookings = await db
 		.select({
 			id: booking.id,
 			roomName: booking.roomName,
@@ -136,6 +136,10 @@ export const filter = loader.authed(
 				lte(booking.startAt, endOfDay),
 			),
 		)
+
+	console.log(bookings)
+
+	return bookings
 })
 
 export const create = action.authed(

@@ -219,14 +219,14 @@ export default function DefaultSideBarContent() {
 
 				<div
 					style={{
-						height:
-							window.innerHeight -
-							(settings.navHeight + settings.headerHeight) -
-							18 -
-							(filter.date.getDate() >= new Date().getDate() ||
+						height: `calc(100vh - ${
+							settings.navHeight + settings.headerHeight
+						} - 18 - ${
+							filter.date.getDate() >= new Date().getDate() ||
 							currentUser.role !== "provider"
 								? 40 + 12
-								: 0),
+								: 0
+						})`,
 					}}
 					className="space-y-2 overflow-y-auto"
 				>
