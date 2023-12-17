@@ -30,7 +30,7 @@ export default function FocusedUserSideBarContent() {
 		)
 
 		draftBooking.edit({
-			username: focusedUser?.name,
+			username: focusedUser?.username,
 			startAt,
 			endAt,
 		})
