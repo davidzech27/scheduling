@@ -40,6 +40,7 @@ async function validate(
 		username: string
 		role: "provider" | "staff" | "admin"
 	},
+	timezoneOffset: number,
 	tx?: Exclude<
 		Parameters<Parameters<typeof db.transaction>[0]>,
 		undefined
@@ -54,14 +55,39 @@ async function validate(
 		}
 	}
 
-	if (startAt.getDate() !== endAt.getDate()) {
+	if (
+		new Date(
+			new Date(
+				startAt.getTime() - timezoneOffset * 60 * 1000,
+			).setUTCHours(0, 0, 0),
+		).getUTCDate() !==
+		new Date(
+			new Date(endAt.getTime() - timezoneOffset * 60 * 1000).setUTCHours(
+				0,
+				0,
+				0,
+			),
+		).getUTCDate()
+	) {
 		return {
 			valid: false as const,
 			message: "Bookings across multiple days are not yet supported.",
 		}
 	}
 
-	if (startAt.getDate() < new Date().getDate() && user.role === "provider") {
+	if (
+		new Date(
+			new Date(
+				startAt.getTime() - timezoneOffset * 60 * 1000,
+			).setUTCHours(0, 0, 0),
+		).getUTCDate() <
+			new Date(
+				new Date(
+					new Date().getTime() - timezoneOffset * 60 * 1000,
+				).setUTCHours(0, 0, 0),
+			).getUTCDate() &&
+		user.role === "provider"
+	) {
 		return {
 			valid: false as const,
 			message: "Bookings for previous days can't be created or updated.",
@@ -81,7 +107,7 @@ async function validate(
 				),
 			),
 		validateDB
-			.select({ id: booking.id })
+			.select()
 			.from(booking)
 			.where(
 				and(
@@ -114,13 +140,27 @@ export const filter = loader.authed(
 		facilityName: z.string(),
 		date: z.date(),
 	}),
-)(async ({ facilityName, date }) => {
+)(async ({ facilityName, date }, { timezoneOffset }) => {
 	noStore()
 
-	const startOfDay = new Date(date.setHours(0, 0, 0, 0))
-	const endOfDay = new Date(date.setHours(23, 59, 59, 999))
-	console.log(startOfDay, endOfDay)
-	const bookings = await db
+	const startOfDay = new Date(
+		new Date(date.getTime() - timezoneOffset * 60 * 1000).setUTCHours(
+			0,
+			0,
+			0,
+		) +
+			timezoneOffset * 60 * 1000,
+	)
+	const endOfDay = new Date(
+		new Date(date.getTime() - timezoneOffset * 60 * 1000).setUTCHours(
+			23,
+			59,
+			59,
+		) +
+			timezoneOffset * 60 * 1000,
+	)
+
+	return await db
 		.select({
 			id: booking.id,
 			roomName: booking.roomName,
@@ -136,10 +176,6 @@ export const filter = loader.authed(
 				lte(booking.startAt, endOfDay),
 			),
 		)
-
-	console.log(bookings)
-
-	return bookings
 })
 
 export const create = action.authed(
@@ -152,7 +188,7 @@ export const create = action.authed(
 	}),
 )(async (
 	{ id, roomName, startAt, endAt, username },
-	{ user, filter: { facilityName } },
+	{ user, filter: { facilityName }, timezoneOffset },
 ) => {
 	noStore()
 
@@ -188,6 +224,7 @@ export const create = action.authed(
 							username,
 						},
 						user,
+						timezoneOffset,
 						tx,
 					),
 				])
@@ -244,7 +281,7 @@ export const update = action.authed(
 	}),
 )(async (
 	{ id, facilityName, roomName, startAt, endAt, username },
-	{ user },
+	{ user, timezoneOffset },
 ) => {
 	noStore()
 
@@ -308,6 +345,7 @@ export const update = action.authed(
 											username ?? existingRow.username,
 									},
 									user,
+									timezoneOffset,
 									tx,
 								),
 								existingRow,

@@ -4,7 +4,7 @@ import { fromZodError } from "zod-validation-error"
 
 import { getJWTPayload, type JWTPayload } from "./jwt"
 
-type User = Omit<JWTPayload, "filter">
+type User = Omit<JWTPayload, "filter" | "timezoneOffset">
 
 type Filter = JWTPayload["filter"]
 
@@ -74,9 +74,11 @@ const loader = {
 			| (({
 					user,
 					filter,
+					timezoneOffset,
 			  }: {
 					user: User
 					filter: Filter
+					timezoneOffset: number
 			  }) => Promise<unknown>),
 	>(
 		inputSchemaOrCallback: TInputSchemaOrCallback,
@@ -87,18 +89,22 @@ const loader = {
 					{
 						user,
 						filter,
+						timezoneOffset,
 					}: {
 						user: User
 						filter: Filter
+						timezoneOffset: number
 					},
 				) => Promise<TResponse>,
 		  ) => (input: z.infer<TInputSchemaOrCallback>) => Promise<TResponse>
 		: TInputSchemaOrCallback extends ({
 					user,
 					filter,
+					timezoneOffset,
 		    }: {
 					user: User
 					filter: Filter
+					timezoneOffset: number
 		    }) => Promise<unknown>
 		  ? () => ReturnType<TInputSchemaOrCallback>
 		  : never => {
@@ -113,9 +119,11 @@ const loader = {
 					{
 						user,
 						filter,
+						timezoneOffset,
 					}: {
 						user: User
 						filter: Filter
+						timezoneOffset: number
 					},
 				) => Promise<TResponse>,
 			): ((input: TInput) => Promise<TResponse>) => {
@@ -141,6 +149,7 @@ const loader = {
 							role: jwtPayload.role,
 						},
 						filter: jwtPayload.filter,
+						timezoneOffset: jwtPayload.timezoneOffset,
 					})
 				}
 			}) as TInputSchemaOrCallback extends z.ZodTypeAny
@@ -150,9 +159,11 @@ const loader = {
 							{
 								user,
 								filter,
+								timezoneOffset,
 							}: {
 								user: User
 								filter: Filter
+								timezoneOffset: number
 							},
 						) => Promise<TResponse>,
 				  ) => (
@@ -161,9 +172,11 @@ const loader = {
 				: TInputSchemaOrCallback extends ({
 							user,
 							filter,
+							timezoneOffset,
 				    }: {
 							user: User
 							filter: Filter
+							timezoneOffset: number
 				    }) => Promise<unknown>
 				  ? () => ReturnType<TInputSchemaOrCallback>
 				  : never
@@ -182,6 +195,7 @@ const loader = {
 						role: jwtPayload.role,
 					},
 					filter: jwtPayload.filter,
+					timezoneOffset: jwtPayload.timezoneOffset,
 				})
 			}) as TInputSchemaOrCallback extends z.ZodTypeAny
 				? <TResponse>(
@@ -190,9 +204,11 @@ const loader = {
 							{
 								user,
 								filter,
+								timezoneOffset,
 							}: {
 								user: User
 								filter: Filter
+								timezoneOffset: number
 							},
 						) => Promise<TResponse>,
 				  ) => (
@@ -201,9 +217,11 @@ const loader = {
 				: TInputSchemaOrCallback extends ({
 							user,
 							filter,
+							timezoneOffset,
 				    }: {
 							user: User
 							filter: Filter
+							timezoneOffset: number
 				    }) => Promise<unknown>
 				  ? () => ReturnType<TInputSchemaOrCallback>
 				  : never

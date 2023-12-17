@@ -125,6 +125,7 @@ export default function Booking({ id }: Props) {
 								((clampedCursorHoursOffset * 60) % 60) / 5,
 							) *
 								5,
+						0,
 					)
 					newEndAt.setHours(
 						initialEndAt.getHours() +
@@ -135,6 +136,7 @@ export default function Booking({ id }: Props) {
 								((clampedCursorHoursOffset * 60) % 60) / 5,
 							) *
 								5,
+						0,
 					)
 
 					const newRoomName =
@@ -299,6 +301,7 @@ export default function Booking({ id }: Props) {
 						newStartAt.setHours(
 							Math.floor(hours),
 							Math.round(((hours * 60) % 60) / 5) * 5,
+							0,
 						)
 
 						if (newStartAt <= initialEndAt) {
@@ -383,6 +386,7 @@ export default function Booking({ id }: Props) {
 						newEndAt.setHours(
 							Math.floor(hours),
 							Math.round(((hours * 60) % 60) / 5) * 5,
+							0,
 						)
 
 						if (newEndAt >= initialStartAt) {

@@ -15,6 +15,7 @@ const jwtPayloadSchema = z.object({
 		facilityName: z.string(),
 		date: z.coerce.date(),
 	}),
+	timezoneOffset: z.number(),
 })
 
 export type JWTPayload = z.infer<typeof jwtPayloadSchema>

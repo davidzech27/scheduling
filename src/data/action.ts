@@ -4,7 +4,7 @@ import { fromZodError } from "zod-validation-error"
 
 import { getJWTPayload, setJWTPayload, type JWTPayload } from "./jwt"
 
-type User = Omit<JWTPayload, "filter">
+type User = Omit<JWTPayload, "filter" | "timezoneOffset">
 
 type Filter = JWTPayload["filter"]
 
@@ -128,12 +128,14 @@ const action = {
 					setUser,
 					filter,
 					setFilter,
+					timezoneOffset,
 					deleteJWTPayload,
 			  }: {
 					user: User
 					setUser: (user: User) => Promise<void>
 					filter: Filter
 					setFilter: (filter: Filter) => Promise<void>
+					timezoneOffset: number
 					deleteJWTPayload: () => Promise<void>
 			  }) => Promise<unknown>),
 	>(
@@ -147,12 +149,14 @@ const action = {
 						setUser,
 						filter,
 						setFilter,
+						timezoneOffset,
 						deleteJWTPayload,
 					}: {
 						user: User
 						setUser: (user: User) => Promise<void>
 						filter: Filter
 						setFilter: (filter: Filter) => Promise<void>
+						timezoneOffset: number
 						deleteJWTPayload: () => Promise<void>
 					},
 				) => Promise<TResponse>,
@@ -162,12 +166,14 @@ const action = {
 					setUser,
 					filter,
 					setFilter,
+					timezoneOffset,
 					deleteJWTPayload,
 		    }: {
 					user: User
 					setUser: (user: User) => Promise<void>
 					filter: Filter
 					setFilter: (filter: Filter) => Promise<void>
+					timezoneOffset: number
 					deleteJWTPayload: () => Promise<void>
 		    }) => Promise<unknown>
 		  ? () => ReturnType<TInputSchemaOrCallback>
@@ -185,12 +191,14 @@ const action = {
 						setUser,
 						filter,
 						setFilter,
+						timezoneOffset,
 						deleteJWTPayload,
 					}: {
 						user: User
 						setUser: (user: User) => Promise<void>
 						filter: Filter
 						setFilter: (filter: Filter) => Promise<void>
+						timezoneOffset: number
 						deleteJWTPayload: () => Promise<void>
 					},
 				) => Promise<TResponse>,
@@ -221,6 +229,7 @@ const action = {
 						filter: jwtPayload.filter,
 						setFilter: async (filter: Filter) =>
 							await setJWTPayload({ ...jwtPayload, filter }),
+						timezoneOffset: jwtPayload.timezoneOffset,
 						deleteJWTPayload: async () =>
 							await setJWTPayload(undefined),
 					})
@@ -234,12 +243,14 @@ const action = {
 								setUser,
 								filter,
 								setFilter,
+								timezoneOffset,
 								deleteJWTPayload,
 							}: {
 								user: User
 								setUser: (user: User) => Promise<void>
 								filter: Filter
 								setFilter: (filter: Filter) => Promise<void>
+								timezoneOffset: number
 								deleteJWTPayload: () => Promise<void>
 							},
 						) => Promise<TResponse>,
@@ -251,12 +262,14 @@ const action = {
 							setUser,
 							filter,
 							setFilter,
+							timezoneOffset,
 							deleteJWTPayload,
 				    }: {
 							user: User
 							setUser: (user: User) => Promise<void>
 							filter: Filter
 							setFilter: (filter: Filter) => Promise<void>
+							timezoneOffset: number
 							deleteJWTPayload: () => Promise<void>
 				    }) => Promise<unknown>
 				  ? () => ReturnType<TInputSchemaOrCallback>
@@ -280,6 +293,7 @@ const action = {
 					filter: jwtPayload.filter,
 					setFilter: async (filter: Filter) =>
 						await setJWTPayload({ ...jwtPayload, filter }),
+					timezoneOffset: jwtPayload.timezoneOffset,
 					deleteJWTPayload: async () =>
 						await setJWTPayload(undefined),
 				})
@@ -292,12 +306,14 @@ const action = {
 								setUser,
 								filter,
 								setFilter,
+								timezoneOffset,
 								deleteJWTPayload,
 							}: {
 								user: User
 								setUser: (user: User) => Promise<void>
 								filter: Filter
 								setFilter: (filter: Filter) => Promise<void>
+								timezoneOffset: number
 								deleteJWTPayload: () => Promise<void>
 							},
 						) => Promise<TResponse>,
@@ -309,12 +325,14 @@ const action = {
 							setUser,
 							filter,
 							setFilter,
+							timezoneOffset,
 							deleteJWTPayload,
 				    }: {
 							user: User
 							setUser: (user: User) => Promise<void>
 							filter: Filter
 							setFilter: (filter: Filter) => Promise<void>
+							timezoneOffset: number
 							deleteJWTPayload: () => Promise<void>
 				    }) => Promise<unknown>
 				  ? () => ReturnType<TInputSchemaOrCallback>

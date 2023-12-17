@@ -13,8 +13,9 @@ export const signIn = action.unauthed(
 	z.object({
 		username: z.string(),
 		password: z.string(),
+		timezoneOffset: z.number(),
 	}),
-)(async ({ username, password }, { setJWTPayload }) => {
+)(async ({ username, password, timezoneOffset }, { setJWTPayload }) => {
 	noStore()
 
 	try {
@@ -52,8 +53,14 @@ export const signIn = action.unauthed(
 			role: existingUserRow.role,
 			filter: {
 				facilityName: facilityRow.name,
-				date: new Date(),
+				date: new Date(
+					new Date(
+						new Date().getTime() - timezoneOffset * 60 * 1000,
+					).setUTCHours(0, 0, 0) +
+						timezoneOffset * 60 * 1000,
+				),
 			},
+			timezoneOffset,
 		})
 	} catch (e) {
 		console.error(e)
