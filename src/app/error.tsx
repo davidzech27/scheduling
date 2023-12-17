@@ -11,9 +11,21 @@ export default function Error({
 }) {
 	useEffect(() => {
 		console.error(error)
+	}, [error])
 
-		reset()
-	}, [error, reset])
+	return (
+		<div className="flex h-screen items-center justify-center bg-black">
+			<div className="space-y-8">
+				<div className="text-5xl font-semibold text-white">Error!</div>
 
-	return null
+				<div
+					onClick={reset}
+					role="button"
+					className="text-5xl font-semibold text-white transition hover:opacity-hover"
+				>
+					Press to reset.
+				</div>
+			</div>
+		</div>
+	)
 }

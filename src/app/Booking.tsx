@@ -81,9 +81,11 @@ export default function Booking({ id }: Props) {
 					settings.hourHeight
 				const initialStartAt = booking.startAt
 				const initialEndAt = booking.endAt
+				const initialRoomName = booking.roomName
 
 				let updatedStartAt = booking.startAt
 				let updatedEndAt = booking.endAt
+				let updatedRoomName = booking.roomName
 
 				const elementWidth = e.currentTarget.clientWidth
 
@@ -161,6 +163,7 @@ export default function Booking({ id }: Props) {
 
 					updatedStartAt = newStartAt
 					updatedEndAt = newEndAt
+					updatedRoomName = newRoomName
 				}
 
 				document.addEventListener("mousemove", updateRange)
@@ -174,7 +177,8 @@ export default function Booking({ id }: Props) {
 
 					if (
 						updatedStartAt.getTime() !== initialStartAt.getTime() ||
-						updatedEndAt.getTime() !== initialEndAt.getTime()
+						updatedEndAt.getTime() !== initialEndAt.getTime() ||
+						updatedRoomName !== initialRoomName
 					) {
 						void booking.save()
 					}

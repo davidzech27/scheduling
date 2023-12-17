@@ -76,7 +76,7 @@ export default function DefaultSideBarContent() {
 	const settings = useSettings()
 
 	const roomListContent = (
-		<div className="space-y-1">
+		<div key="roomListContent" className="space-y-1">
 			<Text variant="label" htmlFor="username">
 				Rooms
 			</Text>
@@ -118,7 +118,7 @@ export default function DefaultSideBarContent() {
 	)
 
 	const userListContent = (
-		<div className="space-y-1">
+		<div key="userListContent" className="space-y-1">
 			<Text variant="label" htmlFor="username">
 				Users
 			</Text>
