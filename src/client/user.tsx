@@ -25,7 +25,7 @@ const createStore = ({
 		combine(
 			{
 				users,
-				username: username,
+				username,
 				fuse: new Fuse(users, {
 					keys: [
 						{ name: "username", weight: 0.75 },

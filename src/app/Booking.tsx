@@ -22,7 +22,7 @@ export default function Booking({ id }: Props) {
 	const user = useUser({ username: booking.username })
 
 	if (user === undefined) {
-		throw new Error(`User with username ${booking.username} not found`)
+		throw new Error(`Booking with id ${id} not found`)
 	}
 
 	const rooms = useRooms()
