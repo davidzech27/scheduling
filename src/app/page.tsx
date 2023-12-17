@@ -1,4 +1,3 @@
-import { unstable_noStore as noStore } from "next/cache"
 import { cookies } from "next/headers"
 import { ChevronDown, LogOut } from "lucide-react"
 
@@ -17,11 +16,7 @@ import { BookingProvider } from "~/client/booking"
 import { UserProvider } from "~/client/user"
 import { SettingsProvider } from "~/client/settings"
 
-export const runtime = "edge"
-
 export default async function HomePage() {
-	noStore()
-
 	const user = await data.user.me()
 
 	const filter = await data.filter.get()

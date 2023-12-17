@@ -4,8 +4,6 @@ import SubmitButton from "~/components/SubmitButton"
 import Input from "~/components/Input"
 import data from "~/data/data"
 
-export const runtime = "edge"
-
 export default function SignInPage() {
 	return (
 		<main className="flex h-screen items-center justify-center bg-subtleBackground">
