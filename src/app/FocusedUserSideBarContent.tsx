@@ -3,7 +3,9 @@ import Button from "~/components/Button"
 import { useSettings } from "~/client/settings"
 import { useFilter } from "~/client/filter"
 import { useCurrentUser, useFocusedUser } from "~/client/user"
-import { useDraftBooking } from "~/client/booking"
+import { useDraftBooking, useUserNextBooking } from "~/client/booking"
+import { useEffect } from "react"
+import formatDuration from "~/util/formatDuration"
 
 export default function FocusedUserSideBarContent() {
 	const focusedUser = useFocusedUser()
@@ -36,6 +38,20 @@ export default function FocusedUserSideBarContent() {
 		})
 	}
 
+	const userNextBooking = useUserNextBooking({
+		username: focusedUser?.username ?? "",
+	})
+
+	useEffect(() => {
+		console.log(userNextBooking?.id)
+		document
+			.getElementById(`booking-${userNextBooking?.id}`)
+			?.scrollIntoView({
+				block: "center",
+				inline: "center",
+			})
+	}, [userNextBooking?.id])
+
 	if (focusedUser === undefined) return null
 
 	return (
@@ -55,18 +71,43 @@ export default function FocusedUserSideBarContent() {
 						</Text>
 					</div>
 
-					<Text className="text-base text-text">
+					<Text className="text-xs text-text">
 						{focusedUser.username}
 					</Text>
 
-					<Text className="text-sm text-subtext">
+					<Text className="text-xs text-subtext">
 						Spent {focusedUser.minutesSpent} minutes at{" "}
 						{filter.facilityName}
 					</Text>
 				</div>
 			</div>
 
-			<div className="flex flex-1 flex-col justify-between p-3 pt-1.5">
+			<div className="flex flex-1 flex-col space-y-3 p-3 pt-1.5">
+				{userNextBooking === undefined ? (
+					<Text
+						as="div"
+						className="text-sm font-semibold text-subtext"
+					>
+						Has no upcoming bookings
+					</Text>
+				) : userNextBooking.startAt > new Date() ? (
+					<Text
+						as="div"
+						className="text-sm font-semibold text-primary"
+					>
+						{userNextBooking.roomName} in{" "}
+						{formatDuration(userNextBooking.startAt)}
+					</Text>
+				) : (
+					<Text
+						as="div"
+						className="text-sm font-semibold text-primary"
+					>
+						In {userNextBooking.roomName} for{" "}
+						{formatDuration(userNextBooking.endAt)}
+					</Text>
+				)}
+
 				{(filter.date.getDate() >= new Date().getDate() ||
 					currentUser.role !== "provider") && (
 					<Button

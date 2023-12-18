@@ -424,3 +424,17 @@ export function useNextBooking() {
 		),
 	)
 }
+
+export function useUserNextBooking({ username }: { username: string }) {
+	return useStore((state) =>
+		state.bookings.reduce<Booking | undefined>(
+			(prev, cur) =>
+				cur.username === username &&
+				cur.endAt > new Date() &&
+				(prev === undefined || cur.endAt < prev.endAt)
+					? cur
+					: prev,
+			undefined,
+		),
+	)
+}

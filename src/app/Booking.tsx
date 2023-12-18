@@ -71,6 +71,7 @@ export default function Booking({ id }: Props) {
 	return (
 		<div
 			ref={ref}
+			id={`booking-${id}`}
 			onFocus={() => {
 				if (
 					document.activeElement?.getAttribute("data-side") !==
