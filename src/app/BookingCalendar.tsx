@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, Minus } from "lucide-react"
+import { Plus, Minus, X } from "lucide-react"
 
 import Text from "~/components/Text"
 import Booking from "./Booking"
@@ -316,7 +316,7 @@ export default function Bookings() {
 							<button
 								onClick={room.focus}
 								className={cn(
-									"flex items-center justify-around rounded-md p-1.5 transition hover:bg-uiBackground",
+									"flex items-center justify-around rounded-md p-1.5 outline-none ring-ring transition hover:bg-uiBackground focus-visible:ring-2",
 									room.focused &&
 										"bg-uiActiveBackground hover:bg-uiActiveBackground",
 								)}
@@ -361,7 +361,13 @@ export default function Bookings() {
 												],
 											},
 											{
-												item: <Text>Add tag</Text>,
+												item: (
+													<>
+														<Plus className="h-4 w-4" />
+
+														<Text>Add tag</Text>
+													</>
+												),
 												onSelect: () => {
 													room.focus()
 
@@ -377,7 +383,7 @@ export default function Bookings() {
 										]}
 										side="bottom"
 									>
-										<div className="flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-title">
+										<div className="flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-title outline-none ring-ring focus-visible:ring-2">
 											<span className="text-[10px] font-semibold text-white">
 												{room.tags.length}
 											</span>
@@ -424,7 +430,15 @@ export default function Bookings() {
 												],
 											},
 											{
-												item: <Text>Resolve flag</Text>,
+												item: (
+													<>
+														<X className="h-4 w-4" />
+
+														<Text>
+															Resolve flag
+														</Text>
+													</>
+												),
 												onSelect: () => {
 													room.focus()
 
@@ -440,7 +454,11 @@ export default function Bookings() {
 										]}
 										side="bottom"
 									>
-										<div className="flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-error" />
+										<div className="flex h-3.5 w-3.5 animate-pulse items-center justify-center rounded-sm bg-primary outline-none ring-ring focus-visible:ring-2">
+											<span className="text-[10px] font-semibold text-white">
+												!
+											</span>
+										</div>
 									</DropdownMenu>
 								)}
 							</button>

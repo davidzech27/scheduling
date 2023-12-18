@@ -38,7 +38,11 @@ const createStore = ({ bookings }: { bookings: Booking[] }) =>
 						})
 					},
 					update: (
-						booking: { id: number } & Partial<Omit<Booking, "id">>,
+						booking: { id: number } & Partial<
+							Omit<Booking, "id" | "flag"> & {
+								flag: string | null
+							}
+						>,
 					) => {
 						set((state) => {
 							const updatedIndex = state.bookings.findIndex(
@@ -60,7 +64,9 @@ const createStore = ({ bookings }: { bookings: Booking[] }) =>
 									booking.endAt !== updatedBooking.endAt) ||
 								(booking.username !== undefined &&
 									booking.username !==
-										updatedBooking.username)
+										updatedBooking.username) ||
+								(booking.flag !== undefined &&
+									booking.flag !== updatedBooking.flag)
 							) {
 								state.bookings[updatedIndex] = {
 									id: booking.id,
@@ -75,6 +81,11 @@ const createStore = ({ bookings }: { bookings: Booking[] }) =>
 									username:
 										booking.username ??
 										updatedBooking.username,
+									flag:
+										booking.flag === null
+											? undefined
+											: booking.flag ??
+											  updatedBooking.flag,
 								}
 							}
 						})
@@ -196,7 +207,10 @@ export function useBooking({ id }: { id: number }) {
 
 			if (booking === undefined) return
 
-			const response = await data.booking.update(booking)
+			const response = await data.booking.update({
+				...booking,
+				flag: booking.flag ?? null,
+			})
 
 			if (response?.status === "error") {
 				update(response.booking)
@@ -209,8 +223,24 @@ export function useBooking({ id }: { id: number }) {
 				showToast({
 					text: response.message,
 					variant: response.status,
+					action:
+						response.oldFlag !== undefined
+							? {
+									text: "Undo",
+									callback: () => {
+										update({
+											id,
+											flag: response.oldFlag,
+										})
+
+										void callbacks.save()
+									},
+							  }
+							: undefined,
 				})
 			}
+			// callbacks.save can't be put here
+			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, [get, update, showToast, id]),
 		delete: useCallback(async () => {
 			const booking = get({ id })

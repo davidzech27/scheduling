@@ -247,8 +247,6 @@ export default function DraftBooking() {
 							}`}
 						</Text>
 					</div>
-
-					<div className="flex justify-end">{/* tags / flags */}</div>
 				</div>
 			</div>
 

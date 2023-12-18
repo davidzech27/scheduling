@@ -10,6 +10,7 @@ import {
 import { create, useStore as useZustandStore } from "zustand"
 import { combine } from "zustand/middleware"
 import { immer } from "zustand/middleware/immer"
+import { useShallow } from "zustand/react/shallow"
 import Fuse from "fuse.js"
 
 import data from "~/data/data"
@@ -24,7 +25,11 @@ const createStore = ({ rooms }: { rooms: Room[] }) =>
 				{
 					rooms,
 					fuse: new Fuse(rooms, {
-						keys: [{ name: "name", weight: 1 }],
+						keys: [
+							{ name: "name", weight: 1 },
+							{ name: "tags", weight: 0.75 },
+							{ name: "flag", weight: 0.5 },
+						],
 					}),
 				},
 				(set, get) => ({
@@ -64,6 +69,13 @@ const createStore = ({ rooms }: { rooms: Room[] }) =>
 								}
 							}
 						})
+					},
+					tags: () => {
+						return [
+							...new Set(
+								get().rooms.flatMap((room) => room.tags),
+							),
+						]
 					},
 					search: ({ text }: { text: string }) => {
 						return get()
@@ -223,6 +235,10 @@ export function useFocusedRoom() {
 	return useRoom({
 		name: focusedEntity?.type === "room" ? focusedEntity.name : "",
 	})
+}
+
+export function useRoomTags() {
+	return useStore(useShallow((state) => state.tags()))
 }
 
 export function useSearchRooms({ text }: { text: string }) {

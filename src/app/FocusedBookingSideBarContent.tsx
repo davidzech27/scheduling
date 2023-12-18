@@ -9,6 +9,7 @@ import { useCurrentUser, useSearchUsers } from "~/client/user"
 import { useSettings } from "~/client/settings"
 import { useSearchRooms } from "~/client/room"
 import { useFilter } from "~/client/filter"
+import TextArea from "~/components/TextArea"
 
 function parseTime(timeString: string) {
 	const [hourString, minuteString] = timeString
@@ -225,6 +226,7 @@ export default function FocusedBookingSideBarContent() {
 		if (focusedBooking?.id !== undefined) {
 			setUsernameInput(focusedBooking.username)
 			setRoomNameInput(focusedBooking.roomName)
+			setFlagInput(focusedBooking.flag)
 
 			if (document.activeElement !== startAtInputRef.current) {
 				setStartAtInput(
@@ -258,7 +260,12 @@ export default function FocusedBookingSideBarContent() {
 		focusedBooking?.roomName,
 		focusedBooking?.startAt,
 		focusedBooking?.endAt,
+		focusedBooking?.flag,
 	])
+
+	const [flagInput, setFlagInput] = useState<string | undefined>(undefined)
+
+	const flagInputRef = useRef<HTMLTextAreaElement>(null)
 
 	const currentUser = useCurrentUser()
 
@@ -483,6 +490,92 @@ export default function FocusedBookingSideBarContent() {
 								className="w-full"
 							/>
 						</div>
+					</div>
+
+					<div className="space-y-1">
+						<Text variant="label" htmlFor="flag">
+							Flag
+						</Text>
+
+						{flagInput === undefined ? (
+							<Button
+								onClick={() => {
+									setFlagInput("")
+
+									setTimeout(() => {
+										flagInputRef.current?.focus()
+									}, 0)
+								}}
+								size="small"
+								variant="light"
+								className="w-full"
+							>
+								Set flag
+							</Button>
+						) : (
+							<TextArea
+								ref={flagInputRef}
+								size="small"
+								id="flag"
+								placeholder="flag"
+								text={flagInput}
+								onText={setFlagInput}
+								onFocus={(element) =>
+									element.currentTarget.select()
+								}
+								onBlur={() => {
+									if (flagInput.trim() === "") {
+										setFlagInput(undefined)
+
+										if (focusedBooking.flag !== undefined) {
+											focusedBooking.edit({
+												flag: null,
+											})
+
+											void focusedBooking.save()
+										}
+									} else if (
+										flagInput.trim() !==
+										focusedBooking.flag?.trim()
+									) {
+										focusedBooking.edit({
+											flag: flagInput.trim(),
+										})
+
+										void focusedBooking.save()
+									}
+								}}
+								onEnter={() => {
+									if (
+										document.activeElement instanceof
+										HTMLElement
+									) {
+										document.activeElement.blur()
+									}
+								}}
+								className="w-full"
+							/>
+						)}
+
+						{focusedBooking.flag !== undefined && (
+							<Button
+								onClick={() => {
+									setFlagInput(undefined)
+
+									focusedBooking.edit({
+										flag: null,
+									})
+
+									void focusedBooking.save()
+								}}
+								size="small"
+								variant="light"
+								id="resolve-flag"
+								className="w-full"
+							>
+								Resolve flag
+							</Button>
+						)}
 					</div>
 				</div>
 

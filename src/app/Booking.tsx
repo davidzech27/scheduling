@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react"
+import { X } from "lucide-react"
 
 import { type Booking } from "~/data/booking"
 import Text from "~/components/Text"
@@ -7,6 +8,7 @@ import cn from "~/util/cn"
 import { useBooking } from "~/client/booking"
 import { useUser } from "~/client/user"
 import { useRooms } from "~/client/room"
+import DropdownMenu from "~/components/DropdownMenu"
 
 interface Props {
 	id: number
@@ -69,7 +71,16 @@ export default function Booking({ id }: Props) {
 	return (
 		<div
 			ref={ref}
-			onFocus={booking.focus}
+			onFocus={() => {
+				if (
+					document.activeElement?.getAttribute("data-side") !==
+						null ||
+					document.activeElement?.getAttribute("role") === "menuitem"
+				)
+					return
+
+				booking.focus()
+			}}
 			onMouseDown={(e) => {
 				const initialCursorHours =
 					(e.pageY +
@@ -265,7 +276,70 @@ export default function Booking({ id }: Props) {
 						</Text>
 					</div>
 
-					<div className="flex justify-end">{/* tags / flags */}</div>
+					<div className="flex justify-end">
+						{booking.flag !== undefined && (
+							<DropdownMenu
+								items={[
+									{
+										group: [
+											{
+												label: (
+													<Text variant="title">
+														Flag
+													</Text>
+												),
+											},
+											{
+												item: (
+													<Text className="max-w-[240px] whitespace-pre-wrap">
+														{booking.flag}
+													</Text>
+												),
+												onSelect: () => {
+													booking.focus()
+
+													setTimeout(() => {
+														document
+															.getElementById(
+																`flag`,
+															)
+															?.focus()
+													}, 0)
+												},
+											},
+										],
+									},
+									{
+										item: (
+											<>
+												<X className="h-4 w-4" />
+
+												<Text>Resolve flag</Text>
+											</>
+										),
+										onSelect: () => {
+											booking.focus()
+
+											setTimeout(() => {
+												document
+													.getElementById(
+														`resolve-flag`,
+													)
+													?.click()
+											}, 0)
+										},
+									},
+								]}
+								side="bottom"
+							>
+								<div className="flex h-3.5 w-3.5 animate-pulse items-center justify-center rounded-sm bg-primary outline-none ring-ring focus-visible:ring-2">
+									<span className="text-[10px] font-semibold text-white">
+										!
+									</span>
+								</div>
+							</DropdownMenu>
+						)}
+					</div>
 				</div>
 			</div>
 

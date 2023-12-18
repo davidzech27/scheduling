@@ -48,7 +48,6 @@ export const booking = sqliteTable(
 		startAt: integer("start_at", { mode: "timestamp" }).notNull(),
 		endAt: integer("end_at", { mode: "timestamp" }).notNull(),
 		username: text("username").notNull(),
-		tags: text("tags").notNull().default("[]"),
 		flag: text("flag"),
 	},
 	(table) => ({

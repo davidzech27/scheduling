@@ -158,7 +158,9 @@ const Input = forwardRef<HTMLInputElement, Props>(
 
 								setEmpty(true)
 
-								setTimeout(() => ref.current?.focus())
+								setTimeout(() => {
+									ref.current?.focus()
+								}, 0)
 							}}
 							onKeyDown={(event) => {
 								if (
@@ -169,9 +171,13 @@ const Input = forwardRef<HTMLInputElement, Props>(
 										ref.current.value = ""
 									}
 
+									onText && onText("")
+
 									setEmpty(true)
 
-									setTimeout(() => ref.current?.focus())
+									setTimeout(() => {
+										ref.current?.focus()
+									}, 0)
 								}
 							}}
 							role="button"

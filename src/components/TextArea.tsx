@@ -85,7 +85,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, Props>(
 					onText && onText(e.currentTarget.value)
 				}}
 				style={{
-					marginBottom: "-8px",
+					marginBottom: "-6px",
 				}}
 				className={cn(
 					{

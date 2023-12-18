@@ -157,22 +157,28 @@ export const filter = loader.authed(
 			timezoneOffset * 60 * 1000,
 	)
 
-	return await db
-		.select({
-			id: booking.id,
-			roomName: booking.roomName,
-			startAt: booking.startAt,
-			endAt: booking.endAt,
-			username: booking.username,
-		})
-		.from(booking)
-		.where(
-			and(
-				eq(booking.facilityName, facilityName),
-				gte(booking.startAt, startOfDay),
-				lte(booking.startAt, endOfDay),
-			),
-		)
+	return (
+		await db
+			.select({
+				id: booking.id,
+				roomName: booking.roomName,
+				startAt: booking.startAt,
+				endAt: booking.endAt,
+				username: booking.username,
+				flag: booking.flag,
+			})
+			.from(booking)
+			.where(
+				and(
+					eq(booking.facilityName, facilityName),
+					gte(booking.startAt, startOfDay),
+					lte(booking.startAt, endOfDay),
+				),
+			)
+	).map((row) => ({
+		...row,
+		flag: row.flag ?? undefined,
+	}))
 })
 
 export const create = action.authed(
@@ -237,7 +243,10 @@ export const create = action.authed(
 					return {
 						status: "success" as const,
 						message: "Booking created.",
-						booking: createdRow,
+						booking: {
+							...createdRow,
+							flag: createdRow.flag ?? undefined,
+						},
 					}
 				} else {
 					errorResponse = {
@@ -273,9 +282,10 @@ export const update = action.authed(
 		startAt: z.date().optional(),
 		endAt: z.date().optional(),
 		username: z.string().optional(),
+		flag: z.string().or(z.null()).optional(),
 	}),
 )(async (
-	{ id, facilityName, roomName, startAt, endAt, username },
+	{ id, facilityName, roomName, startAt, endAt, username, flag },
 	{ user, timezoneOffset },
 ) => {
 	try {
@@ -291,12 +301,30 @@ export const update = action.authed(
 						endAt: Date
 						username: string
 					}
+					oldFlag: undefined
 			  }
 			| undefined
 
 		try {
 			return await db.transaction(async (tx) => {
-				const [, { validation, existingRow }] = await Promise.all([
+				const [existingRow] = await db
+					.select({
+						id: booking.id,
+						facilityName: booking.facilityName,
+						roomName: booking.roomName,
+						startAt: booking.startAt,
+						endAt: booking.endAt,
+						username: booking.username,
+						flag: booking.flag,
+					})
+					.from(booking)
+					.where(eq(booking.id, id))
+
+				if (existingRow === undefined) {
+					throw new Error("Existing row not found")
+				}
+
+				const [, validation] = await Promise.all([
 					tx
 						.update(booking)
 						.set({
@@ -305,45 +333,23 @@ export const update = action.authed(
 							startAt,
 							endAt,
 							username,
+							flag,
 						})
 						.where(eq(booking.id, id)),
-					tx
-						.select({
-							id: booking.id,
-							facilityName: booking.facilityName,
-							roomName: booking.roomName,
-							startAt: booking.startAt,
-							endAt: booking.endAt,
-							username: booking.username,
-						})
-						.from(booking)
-						.where(eq(booking.id, id))
-						.then(async ([existingRow]) => {
-							if (existingRow === undefined) {
-								throw new Error("Existing row not found")
-							}
-
-							return {
-								validation: await validate(
-									{
-										id,
-										facilityName:
-											facilityName ??
-											existingRow.facilityName,
-										roomName:
-											roomName ?? existingRow.roomName,
-										startAt: startAt ?? existingRow.startAt,
-										endAt: endAt ?? existingRow.endAt,
-										username:
-											username ?? existingRow.username,
-									},
-									user,
-									timezoneOffset,
-									tx,
-								),
-								existingRow,
-							}
-						}),
+					validate(
+						{
+							id,
+							facilityName:
+								facilityName ?? existingRow.facilityName,
+							roomName: roomName ?? existingRow.roomName,
+							startAt: startAt ?? existingRow.startAt,
+							endAt: endAt ?? existingRow.endAt,
+							username: username ?? existingRow.username,
+						},
+						user,
+						timezoneOffset,
+						tx,
+					),
 				])
 
 				if (validation.valid) {
@@ -352,15 +358,22 @@ export const update = action.authed(
 						date: startAt,
 					})
 
+					const flagResolved =
+						flag === null && existingRow?.flag !== null
+
 					return {
 						status: "success" as const,
-						message: "Booking updated.",
+						message: !flagResolved
+							? "Booking updated."
+							: "Flag resolved.",
+						oldFlag: flagResolved ? existingRow.flag : undefined,
 					}
 				} else {
 					errorResponse = {
 						status: "error" as const,
 						message: validation.message,
 						booking: existingRow,
+						oldFlag: undefined,
 					}
 
 					tx.rollback()
@@ -396,6 +409,7 @@ export const update = action.authed(
 			status: "error" as const,
 			message: "Failed to update booking.",
 			booking: existingRow,
+			oldFlag: undefined,
 		}
 	}
 })

@@ -5,10 +5,11 @@ import Button from "~/components/Button"
 import Input from "~/components/Input"
 import TextArea from "~/components/TextArea"
 import { useSettings } from "~/client/settings"
-import { useFocusedRoom } from "~/client/room"
+import { useFocusedRoom, useRoomTags } from "~/client/room"
 import { useFilter } from "~/client/filter"
 import { useCurrentUser } from "~/client/user"
 import { useDraftBooking } from "~/client/booking"
+import AutoComplete from "~/components/AutoComplete"
 
 export default function FocusedRoomSideBarContent() {
 	const focusedRoom = useFocusedRoom()
@@ -67,6 +68,12 @@ export default function FocusedRoomSideBarContent() {
 
 	const newTagInputRef = useRef<HTMLInputElement>(null)
 
+	const roomTags = useRoomTags().filter(
+		(roomTag) => !focusedRoom?.tags.includes(roomTag),
+	)
+
+	const autocompleted = useRef(false)
+
 	if (focusedRoom === undefined) return null
 
 	return (
@@ -86,7 +93,7 @@ export default function FocusedRoomSideBarContent() {
 				</div>
 			</div>
 
-			<div className="flex flex-1 flex-col space-y-3 p-3 pt-1.5">
+			<div className="flex flex-1 flex-col space-y-2 p-3 pt-1.5">
 				{(filter.date.getDate() >= new Date().getDate() ||
 					currentUser.role !== "provider") && (
 					<Button
@@ -98,7 +105,7 @@ export default function FocusedRoomSideBarContent() {
 					</Button>
 				)}
 
-				<div className="space-y-2">
+				<div className="space-y-1">
 					<Text variant="label" htmlFor="flag">
 						Flag
 					</Text>
@@ -184,7 +191,7 @@ export default function FocusedRoomSideBarContent() {
 					)}
 				</div>
 
-				<div className="space-y-2">
+				<div className="space-y-1">
 					<Text
 						variant="label"
 						htmlFor={
@@ -196,59 +203,101 @@ export default function FocusedRoomSideBarContent() {
 						Tags
 					</Text>
 
-					<div className="space-y-2">
+					<div className="space-y-1">
 						{tagInputs.map((tag, index) => (
-							<Input
+							<AutoComplete
 								key={index}
-								size="small"
-								id={`tag-${index}`}
-								placeholder="tag"
-								text={tag}
-								onText={(text) =>
-									setTagInputs((tagInputs) => [
-										...tagInputs.slice(0, index),
-										text,
-										...tagInputs.slice(index + 1),
-									])
-								}
-								onFocus={(element) =>
-									element.currentTarget.select()
-								}
-								onBlur={() => {
-									setTagInputs((tagInputs) =>
-										tagInputs
-											.map((tagInput) => tagInput.trim())
-											.filter(Boolean),
-									)
+								results={roomTags.map((roomTag) => ({
+									content: (
+										<Text className="text-sm font-semibold text-title">
+											{roomTag}
+										</Text>
+									),
+									onSelect: () => {
+										setTagInputs((tagInputs) => [
+											...tagInputs.slice(0, index),
+											roomTag,
+											...tagInputs.slice(index + 1),
+										])
 
-									if (
-										tagInputs.some(
-											(tagInput, index) =>
-												tagInput.trim() !==
-												focusedRoom.tags[index],
-										)
-									) {
-										focusedRoom.edit({
-											tags: tagInputs
-												.map((tagInput) =>
-													tagInput.trim(),
+										document
+											.getElementById(`tag-${index}`)
+											?.focus()
+									},
+								}))}
+								open={
+									tag !== "" &&
+									tag !== focusedRoom.tags[index] &&
+									roomTags.length !== 0 &&
+									!roomTags.includes(tag)
+								}
+								onFocus={() => {
+									autocompleted.current = true
+								}}
+								className="w-[231px]"
+							>
+								<Input
+									size="small"
+									id={`tag-${index}`}
+									placeholder="tag"
+									text={tag}
+									onText={(text) =>
+										setTagInputs((tagInputs) => [
+											...tagInputs.slice(0, index),
+											text,
+											...tagInputs.slice(index + 1),
+										])
+									}
+									onFocus={(element) =>
+										element.currentTarget.select()
+									}
+									onBlur={() => {
+										setTimeout(() => {
+											if (autocompleted.current) {
+												autocompleted.current = false
+
+												return
+											}
+
+											setTagInputs((tagInputs) =>
+												tagInputs
+													.map((tagInput) =>
+														tagInput.trim(),
+													)
+													.filter(Boolean),
+											)
+
+											if (
+												tagInputs.some(
+													(tagInput, index) =>
+														tagInput.trim() !==
+														focusedRoom.tags[index],
 												)
-												.filter(Boolean),
-										})
+											) {
+												focusedRoom.edit({
+													tags: tagInputs
+														.map((tagInput) =>
+															tagInput.trim(),
+														)
+														.filter(Boolean),
+												})
 
-										void focusedRoom.save()
-									}
-								}}
-								onEnter={() => {
-									if (
-										document.activeElement instanceof
-										HTMLElement
-									) {
-										document.activeElement.blur()
-									}
-								}}
-								className="w-full"
-							/>
+												void focusedRoom.save()
+											}
+										}, 0)
+									}}
+									onEnter={() => {
+										if (
+											document.activeElement instanceof
+											HTMLElement
+										) {
+											document.activeElement.blur()
+										}
+									}}
+									autoComplete="off"
+									className="w-full"
+								/>
+							</AutoComplete>
 						))}
 
 						{newTagInput === undefined ? (
@@ -268,42 +317,77 @@ export default function FocusedRoomSideBarContent() {
 								Add tag
 							</Button>
 						) : (
-							<Input
-								ref={newTagInputRef}
-								size="small"
-								id="new-tag"
-								placeholder="tag"
-								text={newTagInput}
-								onText={setNewTagInput}
-								onBlur={() => {
-									setNewTagInput(undefined)
+							<AutoComplete
+								results={roomTags.map((roomTag) => ({
+									content: (
+										<Text className="text-sm font-semibold text-title">
+											{roomTag}
+										</Text>
+									),
+									onSelect: () => {
+										setNewTagInput(roomTag)
 
-									if (newTagInput.trim() !== "") {
-										setTagInputs((tagInputs) => [
-											...tagInputs,
-											newTagInput.trim(),
-										])
-
-										focusedRoom.edit({
-											tags: [
-												...focusedRoom.tags,
-												newTagInput.trim(),
-											],
-										})
-
-										void focusedRoom.save()
-									}
+										document
+											.getElementById(`new-tag`)
+											?.focus()
+									},
+								}))}
+								open={
+									newTagInput !== "" &&
+									roomTags.length !== 0 &&
+									!roomTags.includes(newTagInput)
+								}
+								onFocus={() => {
+									autocompleted.current = true
 								}}
-								onEnter={() => {
-									if (
-										document.activeElement instanceof
-										HTMLElement
-									) {
-										document.activeElement.blur()
-									}
-								}}
-								className="w-full"
-							/>
+								className="w-[231px]"
+							>
+								<Input
+									ref={newTagInputRef}
+									size="small"
+									id="new-tag"
+									placeholder="tag"
+									text={newTagInput}
+									onText={setNewTagInput}
+									onBlur={() => {
+										setTimeout(() => {
+											if (autocompleted.current) {
+												autocompleted.current = false
+
+												return
+											}
+
+											setNewTagInput(undefined)
+
+											if (newTagInput.trim() !== "") {
+												setTagInputs((tagInputs) => [
+													...tagInputs,
+													newTagInput.trim(),
+												])
+
+												focusedRoom.edit({
+													tags: [
+														...focusedRoom.tags,
+														newTagInput.trim(),
+													],
+												})
+
+												void focusedRoom.save()
+											}
+										}, 100)
+									}}
+									onEnter={() => {
+										if (
+											document.activeElement instanceof
+											HTMLElement
+										) {
+											document.activeElement.blur()
+										}
+									}}
+									autoComplete="off"
+									className="w-full"
+								/>
+							</AutoComplete>
 						)}
 					</div>
 				</div>

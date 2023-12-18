@@ -79,55 +79,47 @@ export const update = action.authed(
 	}),
 )(async ({ name, tags, flag }, { filter: { facilityName } }) => {
 	try {
-		const [, [existingRow]] = await Promise.all([
-			db
-				.update(room)
-				.set({
-					tags: JSON.stringify(tags),
-					flag,
-				})
-				.where(
-					and(
-						eq(room.facilityName, facilityName),
-						eq(room.name, name),
-					),
-				),
-			db
-				.select({
-					tags: room.tags,
-					flag: room.flag,
-				})
-				.from(room)
-				.where(
-					and(
-						eq(room.facilityName, facilityName),
-						eq(room.name, name),
-					),
-				),
-		])
+		const [existingRow] = await db
+			.select({
+				tags: room.tags,
+				flag: room.flag,
+			})
+			.from(room)
+			.where(
+				and(eq(room.facilityName, facilityName), eq(room.name, name)),
+			)
+
+		await db
+			.update(room)
+			.set({
+				tags: JSON.stringify(tags),
+				flag,
+			})
+			.where(
+				and(eq(room.facilityName, facilityName), eq(room.name, name)),
+			)
+
+		const existingTags = parseTags(existingRow?.tags ?? "[]")
 
 		const updateType =
 			flag === null &&
 			existingRow?.flag !== null &&
 			(tags === undefined ||
-				tags?.every(
-					(tag, index) =>
-						tag === parseTags(existingRow?.tags ?? "[]")[index],
-				))
+				(tags.length === existingTags.length &&
+					tags?.every((tag, index) => tag === existingTags[index])))
 				? ("FlagResolved" as const)
 				: typeof flag === "string" &&
 				    (tags === undefined ||
-							tags?.every(
-								(tag, index) =>
-									tag ===
-									parseTags(existingRow?.tags ?? "[]")[index],
-							))
+							(tags.length === existingTags.length &&
+								tags?.every(
+									(tag, index) => tag === existingTags[index],
+								)))
 				  ? ("FlagSet" as const)
-				  : (tags?.length ?? 0) > (existingRow?.tags.length ?? 0)
+				  : (tags?.length ?? 0) > (existingTags.length ?? 0)
 				    ? ("TagAdded" as const)
-				    : (tags?.length ?? 0) < (existingRow?.tags.length ?? 0)
+				    : (tags?.length ?? 0) < (existingTags.length ?? 0)
 				      ? ("TagRemoved" as const)
-				      : (tags?.length ?? 0) === (existingRow?.tags.length ?? 0)
+				      : (tags?.length ?? 0) === (existingTags.length ?? 0)
 				        ? ("TagUpdated" as const)
 				        : ("Other" as const)
 
