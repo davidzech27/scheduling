@@ -6,6 +6,7 @@ import { Plus, Minus } from "lucide-react"
 
 import Text from "~/components/Text"
 import Booking from "./Booking"
+import DropdownMenu from "~/components/DropdownMenu"
 import DraftBooking from "./DraftBooking"
 import Tooltip from "~/components/Tooltip"
 import { useSettings } from "~/client/settings"
@@ -118,7 +119,7 @@ export default function Bookings() {
 							disableHoverableContent
 						>
 							<div className="rounded-sm outline-none ring-ring focus-visible:ring-2">
-								<Text className="w-6 text-center text-sm font-semibold text-text">
+								<Text className="w-6 whitespace-nowrap text-center text-sm font-semibold text-text">
 									{settings.hourHeight}
 								</Text>
 							</div>
@@ -315,14 +316,133 @@ export default function Bookings() {
 							<button
 								onClick={room.focus}
 								className={cn(
-									"flex justify-center rounded-md p-1.5 transition hover:bg-uiBackground",
+									"flex items-center justify-around rounded-md p-1.5 transition hover:bg-uiBackground",
 									room.focused &&
 										"bg-uiActiveBackground hover:bg-uiActiveBackground",
 								)}
 							>
+								{room.tags.length === 0 ? (
+									<div className="w-3.5" />
+								) : (
+									<DropdownMenu
+										items={[
+											{
+												group: [
+													{
+														label: (
+															<Text variant="title">
+																Tags
+															</Text>
+														),
+													},
+													...room.tags.map(
+														(tag, index) => ({
+															item: (
+																<Text>
+																	{tag}
+																</Text>
+															),
+															onSelect: () => {
+																room.focus()
+
+																setTimeout(
+																	() => {
+																		document
+																			.getElementById(
+																				`tag-${index}`,
+																			)
+																			?.focus()
+																	},
+																	0,
+																)
+															},
+														}),
+													),
+												],
+											},
+											{
+												item: <Text>Add tag</Text>,
+												onSelect: () => {
+													room.focus()
+
+													setTimeout(() => {
+														document
+															.getElementById(
+																`add-tag`,
+															)
+															?.click()
+													}, 0)
+												},
+											},
+										]}
+										side="bottom"
+									>
+										<div className="flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-title">
+											<span className="text-[10px] font-semibold text-white">
+												{room.tags.length}
+											</span>
+										</div>
+									</DropdownMenu>
+								)}
+
 								<Text variant="title" className="text-sm">
 									{room.name}
 								</Text>
+
+								{room.flag === undefined ? (
+									<div className="w-3.5" />
+								) : (
+									<DropdownMenu
+										items={[
+											{
+												group: [
+													{
+														label: (
+															<Text variant="title">
+																Flag
+															</Text>
+														),
+													},
+													{
+														item: (
+															<Text className="max-w-[240px] whitespace-pre-wrap">
+																{room.flag}
+															</Text>
+														),
+														onSelect: () => {
+															room.focus()
+
+															setTimeout(() => {
+																document
+																	.getElementById(
+																		`flag`,
+																	)
+																	?.focus()
+															}, 0)
+														},
+													},
+												],
+											},
+											{
+												item: <Text>Resolve flag</Text>,
+												onSelect: () => {
+													room.focus()
+
+													setTimeout(() => {
+														document
+															.getElementById(
+																`resolve-flag`,
+															)
+															?.click()
+													}, 0)
+												},
+											},
+										]}
+										side="bottom"
+									>
+										<div className="flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-error" />
+									</DropdownMenu>
+								)}
 							</button>
 						</div>
 					))}

@@ -172,6 +172,7 @@ export default function DropdownMenu({
 					side={side}
 					align={align}
 					sideOffset={8}
+					onCloseAutoFocus={(e) => e.preventDefault()}
 					className={cn(
 						"z-50 rounded-lg border border-border bg-white p-1 shadow-sm ease-out animate-in fade-in data-[side=bottom]:slide-in-from-bottom-[2px] data-[side=left]:slide-in-from-left-[2px] data-[side=right]:slide-in-from-right-[2px] data-[side=top]:slide-in-from-top-[2px]",
 						className,

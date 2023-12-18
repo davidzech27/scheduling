@@ -6,6 +6,7 @@ export const metadata = {
 	title: "Scheduling",
 	description: "Audiology room scheduling platform",
 	icons: [{ rel: "icon", url: "/favicon.ico" }],
+	metadataBase: new URL("https://ucsfscheduling.vercel.app"),
 }
 
 export default function RootLayout({

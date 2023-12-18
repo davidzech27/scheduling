@@ -1,5 +1,9 @@
+import { useEffect, useRef, useState } from "react"
+
 import Text from "~/components/Text"
 import Button from "~/components/Button"
+import Input from "~/components/Input"
+import TextArea from "~/components/TextArea"
 import { useSettings } from "~/client/settings"
 import { useFocusedRoom } from "~/client/room"
 import { useFilter } from "~/client/filter"
@@ -43,6 +47,26 @@ export default function FocusedRoomSideBarContent() {
 		}
 	}
 
+	useEffect(() => {
+		if (focusedRoom?.name !== undefined) {
+			setTagInputs(focusedRoom.tags)
+
+			setFlagInput(focusedRoom.flag)
+		}
+	}, [focusedRoom?.name, focusedRoom?.tags, focusedRoom?.flag])
+
+	const [flagInput, setFlagInput] = useState<string | undefined>(undefined)
+
+	const flagInputRef = useRef<HTMLTextAreaElement>(null)
+
+	const [tagInputs, setTagInputs] = useState<string[]>([])
+
+	const [newTagInput, setNewTagInput] = useState<string | undefined>(
+		undefined,
+	)
+
+	const newTagInputRef = useRef<HTMLInputElement>(null)
+
 	if (focusedRoom === undefined) return null
 
 	return (
@@ -62,7 +86,7 @@ export default function FocusedRoomSideBarContent() {
 				</div>
 			</div>
 
-			<div className="flex flex-1 flex-col justify-between p-3 pt-1.5">
+			<div className="flex flex-1 flex-col space-y-3 p-3 pt-1.5">
 				{(filter.date.getDate() >= new Date().getDate() ||
 					currentUser.role !== "provider") && (
 					<Button
@@ -73,6 +97,216 @@ export default function FocusedRoomSideBarContent() {
 						Create booking in room
 					</Button>
 				)}
+
+				<div className="space-y-2">
+					<Text variant="label" htmlFor="flag">
+						Flag
+					</Text>
+
+					{flagInput === undefined ? (
+						<Button
+							onClick={() => {
+								setFlagInput("")
+
+								setTimeout(() => {
+									flagInputRef.current?.focus()
+								}, 0)
+							}}
+							size="small"
+							variant="light"
+							className="w-full"
+						>
+							Set flag
+						</Button>
+					) : (
+						<TextArea
+							ref={flagInputRef}
+							size="small"
+							id="flag"
+							placeholder="flag"
+							text={flagInput}
+							onText={setFlagInput}
+							onFocus={(element) =>
+								element.currentTarget.select()
+							}
+							onBlur={() => {
+								if (flagInput.trim() === "") {
+									setFlagInput(undefined)
+
+									if (focusedRoom.flag !== undefined) {
+										focusedRoom.edit({
+											flag: null,
+										})
+
+										void focusedRoom.save()
+									}
+								} else if (
+									flagInput.trim() !==
+									focusedRoom.flag?.trim()
+								) {
+									focusedRoom.edit({
+										flag: flagInput.trim(),
+									})
+
+									void focusedRoom.save()
+								}
+							}}
+							onEnter={() => {
+								if (
+									document.activeElement instanceof
+									HTMLElement
+								) {
+									document.activeElement.blur()
+								}
+							}}
+							className="w-full"
+						/>
+					)}
+
+					{focusedRoom.flag !== undefined && (
+						<Button
+							onClick={() => {
+								setFlagInput(undefined)
+
+								focusedRoom.edit({
+									flag: null,
+								})
+
+								void focusedRoom.save()
+							}}
+							size="small"
+							variant="light"
+							id="resolve-flag"
+							className="w-full"
+						>
+							Resolve flag
+						</Button>
+					)}
+				</div>
+
+				<div className="space-y-2">
+					<Text
+						variant="label"
+						htmlFor={
+							newTagInput === undefined
+								? `tag-${focusedRoom.tags.length - 1}`
+								: "new-tag"
+						}
+					>
+						Tags
+					</Text>
+
+					<div className="space-y-2">
+						{tagInputs.map((tag, index) => (
+							<Input
+								key={index}
+								size="small"
+								id={`tag-${index}`}
+								placeholder="tag"
+								text={tag}
+								onText={(text) =>
+									setTagInputs((tagInputs) => [
+										...tagInputs.slice(0, index),
+										text,
+										...tagInputs.slice(index + 1),
+									])
+								}
+								onFocus={(element) =>
+									element.currentTarget.select()
+								}
+								onBlur={() => {
+									setTagInputs((tagInputs) =>
+										tagInputs
+											.map((tagInput) => tagInput.trim())
+											.filter(Boolean),
+									)
+
+									if (
+										tagInputs.some(
+											(tagInput, index) =>
+												tagInput.trim() !==
+												focusedRoom.tags[index],
+										)
+									) {
+										focusedRoom.edit({
+											tags: tagInputs
+												.map((tagInput) =>
+													tagInput.trim(),
+												)
+												.filter(Boolean),
+										})
+
+										void focusedRoom.save()
+									}
+								}}
+								onEnter={() => {
+									if (
+										document.activeElement instanceof
+										HTMLElement
+									) {
+										document.activeElement.blur()
+									}
+								}}
+								className="w-full"
+							/>
+						))}
+
+						{newTagInput === undefined ? (
+							<Button
+								onClick={() => {
+									setNewTagInput("")
+
+									setTimeout(() => {
+										newTagInputRef.current?.focus()
+									}, 0)
+								}}
+								size="small"
+								variant="light"
+								id="add-tag"
+								className="w-full"
+							>
+								Add tag
+							</Button>
+						) : (
+							<Input
+								ref={newTagInputRef}
+								size="small"
+								id="new-tag"
+								placeholder="tag"
+								text={newTagInput}
+								onText={setNewTagInput}
+								onBlur={() => {
+									setNewTagInput(undefined)
+
+									if (newTagInput.trim() !== "") {
+										setTagInputs((tagInputs) => [
+											...tagInputs,
+											newTagInput.trim(),
+										])
+
+										focusedRoom.edit({
+											tags: [
+												...focusedRoom.tags,
+												newTagInput.trim(),
+											],
+										})
+
+										void focusedRoom.save()
+									}
+								}}
+								onEnter={() => {
+									if (
+										document.activeElement instanceof
+										HTMLElement
+									) {
+										document.activeElement.blur()
+									}
+								}}
+								className="w-full"
+							/>
+						)}
+					</div>
+				</div>
 			</div>
 		</div>
 	)

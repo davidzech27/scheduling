@@ -52,6 +52,7 @@
     "react-aria": "^3.30.0",
     "react-day-picker": "^8.9.1",
     "react-dom": "18.2.0",
+    "react-expanding-textarea": "^2.3.6",
     "tailwind-merge": "^2.0.0",
     "tailwindcss": "^3.3.5",
     "tailwindcss-animate": "^1.0.7",

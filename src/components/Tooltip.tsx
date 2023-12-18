@@ -45,7 +45,14 @@ export default function Tooltip({
 							className,
 						)}
 					>
-						{<Text variant="prose">{text}</Text>}
+						{
+							<Text
+								variant="prose"
+								className="whitespace-pre-wrap"
+							>
+								{text}
+							</Text>
+						}
 
 						<TooltipPrimitive.Arrow asChild>
 							<svg

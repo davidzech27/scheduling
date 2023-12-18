@@ -1,6 +1,5 @@
 "use server"
 
-import { unstable_noStore as noStore } from "next/cache"
 import z from "zod"
 import {
 	eq,
@@ -141,8 +140,6 @@ export const filter = loader.authed(
 		date: z.date(),
 	}),
 )(async ({ facilityName, date }, { timezoneOffset }) => {
-	noStore()
-
 	const startOfDay = new Date(
 		new Date(date.getTime() - timezoneOffset * 60 * 1000).setUTCHours(
 			0,
@@ -190,10 +187,8 @@ export const create = action.authed(
 	{ id, roomName, startAt, endAt, username },
 	{ user, filter: { facilityName }, timezoneOffset },
 ) => {
-	noStore()
-
 	try {
-		let response = undefined as
+		let errorResponse = undefined as
 			| {
 					status: "error"
 					message: string
@@ -245,7 +240,7 @@ export const create = action.authed(
 						booking: createdRow,
 					}
 				} else {
-					response = {
+					errorResponse = {
 						status: "error" as const,
 						message: validation.message,
 					}
@@ -255,7 +250,7 @@ export const create = action.authed(
 			})
 		} catch (e) {
 			if (e instanceof TransactionRollbackError) {
-				return response
+				return errorResponse
 			} else {
 				throw e
 			}
@@ -283,10 +278,8 @@ export const update = action.authed(
 	{ id, facilityName, roomName, startAt, endAt, username },
 	{ user, timezoneOffset },
 ) => {
-	noStore()
-
 	try {
-		let response = undefined as
+		let errorResponse = undefined as
 			| {
 					status: "error"
 					message: string
@@ -364,7 +357,7 @@ export const update = action.authed(
 						message: "Booking updated.",
 					}
 				} else {
-					response = {
+					errorResponse = {
 						status: "error" as const,
 						message: validation.message,
 						booking: existingRow,
@@ -375,7 +368,7 @@ export const update = action.authed(
 			})
 		} catch (e) {
 			if (e instanceof TransactionRollbackError) {
-				return response
+				return errorResponse
 			} else {
 				throw e
 			}
@@ -412,8 +405,6 @@ export const _delete = action.authed(
 		id: z.number(),
 	}),
 )(async ({ id }) => {
-	noStore()
-
 	try {
 		await db.delete(booking).where(eq(booking.id, id))
 

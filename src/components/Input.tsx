@@ -42,6 +42,7 @@ interface Props extends React.PropsWithChildren {
 	onText?: (text: string) => void
 	onFocus?: FocusEventHandler<HTMLInputElement>
 	onBlur?: FocusEventHandler<HTMLInputElement>
+	onEnter?: () => void
 	required?: boolean
 	placeholder?: string
 	autoFocus?: boolean
@@ -61,6 +62,7 @@ const Input = forwardRef<HTMLInputElement, Props>(
 			onText,
 			onFocus,
 			onBlur,
+			onEnter,
 			required,
 			placeholder,
 			autoFocus,
@@ -91,6 +93,17 @@ const Input = forwardRef<HTMLInputElement, Props>(
 				value={text}
 				onFocus={onFocus}
 				onBlur={onBlur}
+				onKeyDown={(e) => {
+					if (
+						onEnter !== undefined &&
+						e.key === "Enter" &&
+						!e.shiftKey
+					) {
+						e.preventDefault()
+
+						onEnter()
+					}
+				}}
 				required={required}
 				placeholder={placeholder}
 				autoFocus={autoFocus}

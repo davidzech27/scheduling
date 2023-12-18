@@ -41,38 +41,40 @@ const createStore = ({ bookings }: { bookings: Booking[] }) =>
 						booking: { id: number } & Partial<Omit<Booking, "id">>,
 					) => {
 						set((state) => {
-							const editedIndex = state.bookings.findIndex(
+							const updatedIndex = state.bookings.findIndex(
 								({ id }) => id === booking.id,
 							)
 
-							const editedBooking = state.bookings[editedIndex]
+							const updatedBooking = state.bookings[updatedIndex]
 
-							if (editedBooking === undefined) return
+							if (updatedBooking === undefined) return
 
 							if (
 								(booking.roomName !== undefined &&
 									booking.roomName !==
-										editedBooking.roomName) ||
+										updatedBooking.roomName) ||
 								(booking.startAt !== undefined &&
 									booking.startAt !==
-										editedBooking.startAt) ||
+										updatedBooking.startAt) ||
 								(booking.endAt !== undefined &&
-									booking.endAt !== editedBooking.endAt) ||
+									booking.endAt !== updatedBooking.endAt) ||
 								(booking.username !== undefined &&
-									booking.username !== editedBooking.username)
+									booking.username !==
+										updatedBooking.username)
 							) {
-								state.bookings[editedIndex] = {
+								state.bookings[updatedIndex] = {
 									id: booking.id,
 									roomName:
 										booking.roomName ??
-										editedBooking.roomName,
+										updatedBooking.roomName,
 									startAt:
 										booking.startAt ??
-										editedBooking.startAt,
-									endAt: booking.endAt ?? editedBooking.endAt,
+										updatedBooking.startAt,
+									endAt:
+										booking.endAt ?? updatedBooking.endAt,
 									username:
 										booking.username ??
-										editedBooking.username,
+										updatedBooking.username,
 								}
 							}
 						})

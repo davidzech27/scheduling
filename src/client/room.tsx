@@ -9,30 +9,69 @@ import {
 } from "react"
 import { create, useStore as useZustandStore } from "zustand"
 import { combine } from "zustand/middleware"
+import { immer } from "zustand/middleware/immer"
 import Fuse from "fuse.js"
 
+import data from "~/data/data"
 import { type Room } from "~/data/room"
 import { useFocusEntity, useFocusedEntity } from "./focus"
+import { useShowToast } from "~/components/Toast"
 
 const createStore = ({ rooms }: { rooms: Room[] }) =>
 	create(
-		combine(
-			{
-				rooms,
-				fuse: new Fuse(rooms, {
-					keys: [{ name: "name", weight: 1 }],
+		immer(
+			combine(
+				{
+					rooms,
+					fuse: new Fuse(rooms, {
+						keys: [{ name: "name", weight: 1 }],
+					}),
+				},
+				(set, get) => ({
+					get: ({ name }: { name: string }) => {
+						return get().rooms.find((room) => room.name === name)
+					},
+					update: (
+						room: { name: string } & Partial<
+							Omit<Room, "name" | "flag" | "minutesUsed"> & {
+								flag: string | null
+							}
+						>,
+					) => {
+						set((state) => {
+							const updatedIndex = state.rooms.findIndex(
+								({ name }) => name === room.name,
+							)
+
+							const updatedRoom = state.rooms[updatedIndex]
+
+							if (updatedRoom === undefined) return
+
+							if (
+								(room.tags !== undefined &&
+									room.tags !== updatedRoom.tags) ||
+								(room.flag !== undefined &&
+									room.flag !== updatedRoom.flag)
+							) {
+								state.rooms[updatedIndex] = {
+									name: updatedRoom.name,
+									tags: room.tags ?? updatedRoom.tags,
+									flag:
+										room.flag === null
+											? undefined
+											: room.flag ?? updatedRoom.flag,
+									minutesUsed: updatedRoom.minutesUsed,
+								}
+							}
+						})
+					},
+					search: ({ text }: { text: string }) => {
+						return get()
+							.fuse.search(text)
+							.map((result) => result.item)
+					},
 				}),
-			},
-			(_, get) => ({
-				get: ({ name }: { name: string }) => {
-					return get().rooms.find((room) => room.name === name)
-				},
-				search: ({ text }: { text: string }) => {
-					return get()
-						.fuse.search(text)
-						.map((result) => result.item)
-				},
-			}),
+			),
 		),
 	)
 
@@ -96,11 +135,68 @@ export function useRooms() {
 export function useRoom({ name }: { name: string }) {
 	const room = useStore((state) => state.get({ name }))
 
+	const get = useStore((state) => state.get)
+
+	const update = useStore((state) => state.update)
+
 	const focusedEntity = useFocusedEntity()
 
 	const focusEntity = useFocusEntity()
 
+	const showToast = useShowToast()
+
 	const callbacks = {
+		edit: useCallback(
+			(
+				room: Omit<
+					Parameters<typeof update>[0],
+					"name" | "minutesUsed"
+				>,
+			) => {
+				update({ name, ...room })
+			},
+			[update, name],
+		),
+		save: useCallback(async () => {
+			const room = get({ name })
+
+			if (room === undefined) return
+
+			const response = await data.room.update({
+				...room,
+				flag: room.flag ?? null,
+			})
+
+			if (response?.status === "error") {
+				update(response.room)
+			}
+
+			if (
+				response?.status !== undefined &&
+				response.message !== undefined
+			) {
+				showToast({
+					text: response.message,
+					variant: response.status,
+					action:
+						response.oldFlag !== undefined
+							? {
+									text: "Undo",
+									callback: () => {
+										update({
+											name,
+											flag: response.oldFlag,
+										})
+
+										void callbacks.save()
+									},
+							  }
+							: undefined,
+				})
+			}
+			// callbacks.save can't be put here
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+		}, [get, name, update, showToast]),
 		focus: useCallback(() => {
 			if (room === undefined) return
 

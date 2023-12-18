@@ -13,6 +13,7 @@ interface Props extends React.PropsWithChildren {
 	type?: "button" | "submit" | "reset"
 	disabled?: boolean
 	loading?: boolean
+	id?: string
 	className?: string
 }
 
@@ -28,6 +29,7 @@ const Button = forwardRef<HTMLButtonElement, Props>(
 			type,
 			disabled,
 			loading,
+			id,
 			className,
 		},
 		ref,
@@ -39,6 +41,7 @@ const Button = forwardRef<HTMLButtonElement, Props>(
 				formAction={formAction}
 				type={type}
 				disabled={disabled === true || loading === true}
+				id={id}
 				className={cn(
 					"relative flex items-center rounded-lg outline-offset-[-2px] outline-white ring-ring transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:ring-2",
 					{

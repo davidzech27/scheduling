@@ -55,9 +55,9 @@ const createStore = ({
 				},
 				constrainRoomsInView: () => {
 					set((state) => ({
-						roomsInView: Math.min(
-							state.roomsInView,
-							get().maxRoomsInView,
+						roomsInView: Math.max(
+							1,
+							Math.min(state.roomsInView, get().maxRoomsInView),
 						),
 					}))
 

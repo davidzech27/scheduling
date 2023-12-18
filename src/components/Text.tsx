@@ -49,6 +49,7 @@ const Text = forwardRef<HTMLElement, Props>(
 				htmlFor={htmlFor}
 				dangerouslySetInnerHTML={dangerouslySetInnerHTML}
 				className={cn(
+					"break-words",
 					variant &&
 						{
 							heading:
