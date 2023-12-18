@@ -517,6 +517,12 @@ export default function Bookings() {
 						/>
 					)}
 
+					{bookingIds.map((id) => (
+						<Booking key={id} id={id} />
+					))}
+
+					<DraftBooking />
+
 					{rooms.map((room) => (
 						<div
 							key={room.name}
@@ -726,12 +732,6 @@ export default function Bookings() {
 								))}
 						</div>
 					))}
-
-					{bookingIds.map((id) => (
-						<Booking key={id} id={id} />
-					))}
-
-					<DraftBooking />
 				</div>
 			</div>
 		</div>
