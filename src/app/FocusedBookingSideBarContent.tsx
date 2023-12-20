@@ -274,7 +274,11 @@ export default function FocusedBookingSideBarContent() {
 	const deleteFocusedBooking = focusedBooking?.delete
 
 	useEffect(() => {
-		if (currentUser.role === "provider" && filter.date < new Date()) return
+		if (
+			currentUser.role === "provider" &&
+			filter.date.getDate() < new Date().getDate()
+		)
+			return
 
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (
@@ -580,7 +584,7 @@ export default function FocusedBookingSideBarContent() {
 				</div>
 
 				{(currentUser.role !== "provider" ||
-					filter.date >= new Date()) && (
+					filter.date.getDate() >= new Date().getDate()) && (
 					<Button
 						onClick={focusedBooking.delete}
 						size="medium"
