@@ -86,7 +86,13 @@ export default function DefaultSideBarContent() {
 					No rooms found
 				</Text>
 
-				{(searchInput === "" ? rooms : searchedRooms)
+				{(searchInput === ""
+					? rooms.sort(
+							(room1, room2) =>
+								room1.minutesUsed - room2.minutesUsed,
+					  )
+					: searchedRooms
+				)
 					.filter(
 						(room) => searchInput !== "" || room.minutesUsed > 0,
 					)

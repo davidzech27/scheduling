@@ -61,14 +61,12 @@ export const filter = loader.authed(
 		roomsWithMinutesUsed.map((room) => [room.name, room.minutesUsed]),
 	)
 
-	return rooms
-		.map((room) => ({
-			name: room.name,
-			tags: parseTags(room.tags),
-			flag: room.flag ?? undefined,
-			minutesUsed: nameToMinutesUsedMap.get(room.name) ?? 0,
-		}))
-		.sort((room1, room2) => room2.minutesUsed - room1.minutesUsed)
+	return rooms.map((room) => ({
+		name: room.name,
+		tags: parseTags(room.tags),
+		flag: room.flag ?? undefined,
+		minutesUsed: nameToMinutesUsedMap.get(room.name) ?? 0,
+	}))
 })
 
 export const update = action.authed(
