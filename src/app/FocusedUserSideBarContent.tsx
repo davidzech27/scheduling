@@ -43,11 +43,12 @@ export default function FocusedUserSideBarContent() {
 	})
 
 	useEffect(() => {
-		console.log(userNextBooking?.id)
+		if (userNextBooking?.id === undefined) return
+
 		document
-			.getElementById(`booking-${userNextBooking?.id}`)
+			.getElementById(`booking-${userNextBooking.id}`)
 			?.scrollIntoView({
-				block: "center",
+				block: "nearest", // ideally would be center
 				inline: "center",
 			})
 	}, [userNextBooking?.id])
@@ -83,30 +84,31 @@ export default function FocusedUserSideBarContent() {
 			</div>
 
 			<div className="flex flex-1 flex-col space-y-3 p-3 pt-1.5">
-				{userNextBooking === undefined ? (
-					<Text
-						as="div"
-						className="text-sm font-semibold text-subtext"
-					>
-						Has no upcoming bookings
-					</Text>
-				) : userNextBooking.startAt > new Date() ? (
-					<Text
-						as="div"
-						className="text-sm font-semibold text-primary"
-					>
-						{userNextBooking.roomName} in{" "}
-						{formatDuration(userNextBooking.startAt)}
-					</Text>
-				) : (
-					<Text
-						as="div"
-						className="text-sm font-semibold text-primary"
-					>
-						In {userNextBooking.roomName} for{" "}
-						{formatDuration(userNextBooking.endAt)}
-					</Text>
-				)}
+				{filter.date.getDate() === new Date().getDate() &&
+					(userNextBooking === undefined ? (
+						<Text
+							as="div"
+							className="text-sm font-semibold text-subtext"
+						>
+							Has no upcoming bookings
+						</Text>
+					) : userNextBooking.startAt > new Date() ? (
+						<Text
+							as="div"
+							className="text-sm font-semibold text-primary"
+						>
+							{userNextBooking.roomName} in{" "}
+							{formatDuration(userNextBooking.startAt)}
+						</Text>
+					) : (
+						<Text
+							as="div"
+							className="text-sm font-semibold text-primary"
+						>
+							In {userNextBooking.roomName} for{" "}
+							{formatDuration(userNextBooking.endAt)}
+						</Text>
+					))}
 
 				{(filter.date.getDate() >= new Date().getDate() ||
 					currentUser.role !== "provider") && (

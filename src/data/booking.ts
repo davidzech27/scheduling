@@ -93,7 +93,7 @@ async function validate(
 		}
 	}
 
-	const [roomConflictingRows, userConflictingRows] = await Promise.all([
+	const [roomConflictingRows] = await Promise.all([
 		validateDB
 			.select({ id: booking.id })
 			.from(booking)
@@ -105,16 +105,16 @@ async function validate(
 					gt(booking.endAt, startAt),
 				),
 			),
-		validateDB
-			.select()
-			.from(booking)
-			.where(
-				and(
-					eq(booking.username, username),
-					lt(booking.startAt, endAt),
-					gt(booking.endAt, startAt),
-				),
-			),
+		// validateDB
+		// 	.select()
+		// 	.from(booking)
+		// 	.where(
+		// 		and(
+		// 			eq(booking.username, username),
+		// 			lt(booking.startAt, endAt),
+		// 			gt(booking.endAt, startAt),
+		// 		),
+		// 	),
 	])
 
 	if (roomConflictingRows.some((row) => row.id !== id)) {
@@ -124,12 +124,12 @@ async function validate(
 		}
 	}
 
-	if (userConflictingRows.some((row) => row.id !== id)) {
-		return {
-			valid: false as const,
-			message: "User can't be in multiple places at once.",
-		}
-	}
+	// if (userConflictingRows.some((row) => row.id !== id)) {
+	// 	return {
+	// 		valid: false as const,
+	// 		message: "User can't be in multiple places at once.",
+	// 	}
+	// }
 
 	return { valid: true as const }
 }

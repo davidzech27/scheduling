@@ -340,6 +340,14 @@ export function useDraftBooking() {
 	const focusedEntity = useFocusedEntity()
 	const focused = focusedEntity?.type === "draft"
 
+	useEffect(() => {
+		if (focusedEntity === undefined) return
+
+		if (focusedEntity.type === "user") {
+			updateDraft({ username: focusedEntity.username })
+		}
+	}, [focusedEntity, updateDraft])
+
 	const focusEntity = useFocusEntity()
 
 	const unfocus = useUnfocus()

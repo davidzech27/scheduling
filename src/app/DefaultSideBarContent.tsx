@@ -185,6 +185,7 @@ export default function DefaultSideBarContent() {
 				/>
 
 				{searchInput === "" &&
+					filter.date.getDate() === new Date().getDate() &&
 					(nextBooking === undefined ? (
 						<Text
 							as="div"
