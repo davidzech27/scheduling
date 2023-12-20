@@ -54,12 +54,9 @@ const createStore = ({
 					document.cookie = `rooms_in_view=${get().roomsInView}`
 				},
 				constrainRoomsInView: () => {
-					set((state) => ({
-						roomsInView: Math.max(
-							1,
-							Math.min(state.roomsInView, get().maxRoomsInView),
-						),
-					}))
+					set({
+						roomsInView: get().maxRoomsInView,
+					})
 
 					document.cookie = `rooms_in_view=${get().roomsInView}`
 				},
